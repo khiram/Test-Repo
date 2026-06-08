@@ -1,17 +1,30 @@
-# This is a sample Python script.
+from fastapi import FastAPI
+from pydantic import BaseModel
+from passlib.context import CryptContext
+from fastapi.middleware.cors import CORSMiddleware
 
-# Press ⌃F5 to execute it or replace it with your code.
-# Press Double ⇧ to search everywhere for classes, files, tool windows, actions, and settings.
-import os
+app = FastAPI()
 
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press F9 to toggle the breakpoint.
+# This is the "add_middleware" code section that grants your Vite page permission to connect
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
+class PasswordSubmission(BaseModel):
+    password: str
 
-# Press the green button in the gutter to run the script.
-if __name__ == '__main__':
-    print_hi('PyCharm')
-
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+@app.post("/api/hash-password")
+def hash_password(data: PasswordSubmission):
+    plain_password = data.password
+    hashed_password = pwd_context.hash(plain_password)
+    return {
+        "status": "success",
+        "original_length": len(plain_password),
+        "secure_hash": hashed_password
+    }
