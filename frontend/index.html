@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Cybersecurity Hashing Tool</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 40px; background: #f4f7f6; }
+    .container { max-width: 500px; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+    input, button { width: 100%; padding: 10px; margin-top: 10px; border-radius: 4px; box-sizing: border-box; }
+    button { background: #2563eb; color: white; border: none; cursor: pointer; font-weight: bold; }
+    .result { margin-top: 20px; word-break: break-all; background: #e0f2fe; padding: 15px; border-radius: 4px; display: none; }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h2>Secure Password Hasher</h2>
+    <p>Type a password below to securely generate a bcrypt hash on our Python backend.</p>
+
+    <input type="password" id="passwordInput" placeholder="Enter password here...">
+    <button id="hashBtn">Generate Secure Hash</button>
+
+    <div id="resultBox" class="result">
+      <strong>Secure Hash Result:</strong>
+      <p id="hashValue"></p>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById('hashBtn').addEventListener('click', async () => {
+      const password = document.getElementById('passwordInput').value;
+      const resultBox = document.getElementById('resultBox');
+      const hashValue = document.getElementById('hashValue');
+
+      if (!password) return alert("Please type a password first!");
+
+      try {
+        // 3. Use JavaScript 'fetch' to send the data to the Python Backend
+        const response = await fetch('http://127.0.0.1:8000/api/hash-password', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ password: password }) // Matches Pydantic model
+        });
+
+        const data = await response.json();
+
+        // Display the results on screen
+        hashValue.innerText = data.secure_hash;
+        resultBox.style.display = 'block';
+
+      } catch (error) {
+        console.error("Error connecting to backend:", error);
+        alert("Failed to connect to backend server.");
+      }
+    });
+  </script>
+</body>
+</html>
